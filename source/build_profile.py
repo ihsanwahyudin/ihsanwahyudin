@@ -112,16 +112,15 @@ for row,items in enumerate([tools[:15],list(reversed(tools[15:]))]):
    s.text(name,x+47,y+27,16);x+=w+10
  s.add('</g></g>')
 s.add('</g>');s.save('hero.svg');s.save('hero-static.svg',False)
-# Matched contact buttons, so the three links remain individually clickable in README.
-for name,label,sub in [('portfolio','Portfolio','ihsan.my.id'),('linkedin','LinkedIn',"Let’s connect"),('email','Email','Say hello')]:
- s=SVG(400,88,label+' — '+sub);s.rect(0,0,400,88,'white',24);s.label(label,24,31);s.text(sub,24,62,22,500,track=-.5);s.add('<circle cx="358" cy="44" r="18" fill="#111113"/>');s.arrow(353,39,'white');s.save(name+'.svg')
+# Adjacent thirds span the hero width exactly. Transparent SVG insets provide
+# equal 12-unit gaps without adding whitespace to the README image row.
+for index,(name,label,sub) in enumerate([('portfolio','Portfolio','ihsan.my.id'),('linkedin','LinkedIn',"Let’s connect"),('email','Email','Say hello')]):
+ s=SVG(400,88,label+' — '+sub);s.add(f'<g transform="translate({index*4} 0)">');s.rect(0,0,392,88,'white',24);s.label(label,24,31);s.text(sub,24,62,22,500,track=-.5);s.add('<circle cx="350" cy="44" r="18" fill="#111113"/>');s.arrow(345,39,'white');s.add('</g>');s.save(name+'.svg')
 # README uses the same assets for the complete composition, with real links kept outside image-only cards.
 (OUT/'README.md').write_text('''<a href="https://www.ihsan.my.id"><img src="./assets/hero.svg" width="100%" alt="Muhammad Ihsan Wahyudin — Software Engineer · Backend & Full-Stack. Backend, web and mobile systems. Animated tech stack." /></a>
 
 <p align="center">
-<a href="https://www.ihsan.my.id"><img src="./assets/portfolio.svg" width="32%" alt="Visit my portfolio" /></a>
-<a href="https://www.linkedin.com/in/muhammad-ihsan-wahyudin-1a4a19209"><img src="./assets/linkedin.svg" width="32%" alt="Connect on LinkedIn" /></a>
-<a href="mailto:m.ihsanwahyudin@gmail.com"><img src="./assets/email.svg" width="32%" alt="Send me an email" /></a>
+<a href="https://www.ihsan.my.id"><img src="./assets/portfolio.svg" width="33.333333%" alt="Visit my portfolio" /></a><a href="https://www.linkedin.com/in/muhammad-ihsan-wahyudin-1a4a19209"><img src="./assets/linkedin.svg" width="33.333333%" alt="Connect on LinkedIn" /></a><a href="mailto:m.ihsanwahyudin@gmail.com"><img src="./assets/email.svg" width="33.333333%" alt="Send me an email" /></a>
 </p>
 ''')
 (OUT/'INSTALL.md').write_text('''# GitHub profile — portfolio design edition
@@ -155,5 +154,5 @@ Font: Geist / Geist Mono (SIL Open Font License), https://github.com/google/font
 CodeMark dan ikon antarmuka diadaptasi dari komponen website. Lucide code-xml memakai lisensi ISC.
 ''')
 # Preview HTML uses exactly the same SVG image references as README.
-(OUT/'preview.html').write_text('''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ihsan · GitHub profile preview</title><style>*{box-sizing:border-box}body{margin:0;background:#0d1117;color:#c9d1d9;font:14px Arial,sans-serif}main{max-width:1012px;margin:32px auto;padding:28px;border:1px solid #30363d;border-radius:12px}img{width:100%;display:block}.links{display:flex;gap:8px;margin:16px 0}.links a{width:33.333%}.projects{display:flex;gap:12px}.projects a{width:50%}section{margin-top:24px}p{text-align:center;margin:24px}a{color:#a399ff}small{display:block;color:#8b949e;margin-bottom:24px} @media(max-width:650px){main{padding:12px;margin:0;border:none}}</style><main><small>README.md · Preview</small><a href="https://www.ihsan.my.id"><img src="assets/hero.svg" alt="Ihsan profile"/></a><div class="links"><a href="https://www.ihsan.my.id"><img src="assets/portfolio.svg" alt="Portfolio"/></a><a href="https://www.linkedin.com/in/muhammad-ihsan-wahyudin-1a4a19209"><img src="assets/linkedin.svg" alt="LinkedIn"/></a><a href="mailto:m.ihsanwahyudin@gmail.com"><img src="assets/email.svg" alt="Email"/></a></div></main></html>''')
+(OUT/'preview.html').write_text('''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ihsan · GitHub profile preview</title><style>*{box-sizing:border-box}body{margin:0;background:#0d1117;color:#c9d1d9;font:14px Arial,sans-serif}main{max-width:1012px;margin:32px auto;padding:28px;border:1px solid #30363d;border-radius:12px}img{width:100%;display:block}.links{margin:16px 0;line-height:0}.links a{display:inline}.links img{display:inline-block;vertical-align:top;width:33.333333%}.projects{display:flex;gap:12px}.projects a{width:50%}section{margin-top:24px}p{text-align:center;margin:24px}a{color:#a399ff}small{display:block;color:#8b949e;margin-bottom:24px} @media(max-width:650px){main{padding:12px;margin:0;border:none}}</style><main><small>README.md · Preview</small><a href="https://www.ihsan.my.id"><img src="assets/hero.svg" alt="Ihsan profile"/></a><div class="links"><a href="https://www.ihsan.my.id"><img src="assets/portfolio.svg" alt="Portfolio"/></a><a href="https://www.linkedin.com/in/muhammad-ihsan-wahyudin-1a4a19209"><img src="assets/linkedin.svg" alt="LinkedIn"/></a><a href="mailto:m.ihsanwahyudin@gmail.com"><img src="assets/email.svg" alt="Email"/></a></div></main></html>''')
 print('Rebuilt',len(list(A.glob('*.svg'))),'SVG assets with original Geist outlines, colors, real logos and project screenshots.')
