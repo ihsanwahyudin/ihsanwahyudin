@@ -27,9 +27,3 @@ Alongside building features, I review code, mentor junior engineers, troubleshoo
   <a href="https://github.com/ihsanwahyudin?tab=repositories">Explore my repositories ↗</a>
 </p>
 
-<img src="./assets/activity.svg" width="100%" alt="A little progress, every day" />
-
-[![Ihsan's GitHub contribution activity](https://github-readme-activity-graph.vercel.app/graph?username=ihsanwahyudin&bg_color=f2f0eb&color=616161&title_color=17151b&line=7950ed&point=f4794e&area_color=d9ceff&area=true&hide_border=true&radius=16&custom_title=Contributions%20over%20the%20last%2031%20days)](https://github.com/ihsanwahyudin)
-
-<p align="center"><sub>From an idea to something people can use.</sub><br /><a href="https://www.ihsan.my.id">www.ihsan.my.id ↗</a></p>
-
