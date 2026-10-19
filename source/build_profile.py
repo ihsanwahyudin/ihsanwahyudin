@@ -112,16 +112,81 @@ for row,items in enumerate([tools[:15],list(reversed(tools[15:]))]):
    s.text(name,x+47,y+27,16);x+=w+10
  s.add('</g></g>')
 s.add('</g>');s.save('hero.svg');s.save('hero-static.svg',False)
-# Adjacent thirds span the hero width exactly. Transparent SVG insets provide
-# equal 12-unit gaps without adding whitespace to the README image row.
+# Three 32% contact cards plus two explicit 2% spacer images span 100%.
+# Spacing belongs to the Markdown layout, so it is visible even with cached cards.
 for index,(name,label,sub) in enumerate([('portfolio','Portfolio','ihsan.my.id'),('linkedin','LinkedIn',"Let’s connect"),('email','Email','Say hello')]):
- s=SVG(400,88,label+' — '+sub);s.add(f'<g transform="translate({index*4} 0)">');s.rect(0,0,392,88,'white',24);s.label(label,24,31);s.text(sub,24,62,22,500,track=-.5);s.add('<circle cx="350" cy="44" r="18" fill="#111113"/>');s.arrow(345,39,'white');s.add('</g>');s.save(name+'.svg')
+ s=SVG(400,88,label+' — '+sub);s.add('<g>');s.rect(0,0,400,88,'white',24);s.label(label,24,31);s.text(sub,24,62,22,500,track=-.5);s.add('<circle cx="358" cy="44" r="18" fill="#111113"/>');s.arrow(353,39,'white');s.add('</g>');s.save(name+'.svg')
+(A/'contact-gap.svg').write_text('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="1" viewBox="0 0 24 1"></svg>')
+# Long-term project: a restrained vision, plus a real English website screenshot.
+s=SVG(1200,668,'Long-term Project — Rs Ecosystem. Offline-first personal apps, built on a shared Rust core. Starting with finance and passwords, and expanding gradually. Website preview in English.')
+s.canvas()
+# Keep the glyph mask stationary while a double-width mirrored gradient moves underneath.
+# The title shares its left edge with the card's logo and body copy.
+heading_width=s.text('Long-term Project',56,64,48,600,'white',track=-2.16)
+heading_glyphs=s.parts.pop()
+s.defs.append(f'<mask id="longterm-heading-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="1200" height="100">{heading_glyphs}</mask>')
+s.defs.append(f'<linearGradient id="longterm-title" gradientUnits="userSpaceOnUse" x1="56" y1="0" x2="{56+heading_width*2}" y2="0"><stop stop-color="#5b4cf5"/><stop offset=".25" stop-color="#c04cf5"/><stop offset=".5" stop-color="#f5844c"/><stop offset=".75" stop-color="#c04cf5"/><stop offset="1" stop-color="#5b4cf5"/></linearGradient>')
+s.defs.append(f'<style>@keyframes longterm-gradient-flow{{from{{transform:translateX(0)}}to{{transform:translateX(-{heading_width:.3f}px)}}}}.longterm-gradient-track{{animation:longterm-gradient-flow 6s ease-in-out infinite alternate}}@media(prefers-reduced-motion:reduce){{.longterm-gradient-track{{animation:none!important}}}}</style>')
+s.add(f'<g mask="url(#longterm-heading-mask)"><rect class="longterm-gradient-track" x="56" width="{heading_width*2}" height="100" fill="url(#longterm-title)"/></g>')
+s.add('<g transform="translate(0 -72)">')
+s.rect(24,176,1152,540)
+s.defs.append('<clipPath id="ecosystem-card"><rect x="24" y="176" width="1152" height="540" rx="28"/></clipPath><linearGradient id="ecosystem-panel" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ded8ff"/><stop offset="1" stop-color="#d3e7ff"/></linearGradient><clipPath id="website-frame"><rect x="662" y="232" width="784" height="485" rx="18"/></clipPath>')
+s.add('<g clip-path="url(#ecosystem-card)"><rect x="628" y="176" width="548" height="540" fill="url(#ecosystem-panel)"/>')
+s.add('<g clip-path="url(#website-frame)"><rect x="662" y="232" width="784" height="485" fill="white"/><rect x="662" y="232" width="784" height="44" fill="#f7f7f5"/>')
+for x,color in [(684,'#ff6058'),(702,'#ffbd2e'),(720,'#28c840')]:s.add(f'<circle cx="{x}" cy="254" r="5" fill="{color}"/>')
+s.rect(742,243,354,23,'white',7,False);s.text('rs-ecosystem.ihsan.my.id/en',756,259,12,fill=MUTED,family='mono')
+s.image(SOURCE/'rs-ecosystem-en.jpg',662,276,784,441)
+s.add('</g><rect x="662" y="232" width="784" height="485" rx="18" fill="none" stroke="#111113" stroke-opacity=".1"/></g>')
+# Match ProjectDetails typography: 24/14/16 at 1.25x, with a shared title/tagline column.
+s.add('<g transform="translate(0 -56)">')
+s.rect(56,265,56,56,'#262626',15,False);s.image(SOURCE/'rs-mark.svg',66,283,36,21.4)
+s.text('Rs Ecosystem',128,288,30,600,track=-.75)
+s.text('Personal apps whose data stays yours.',128,316,17.5,fill=MUTED)
+
+def project_paragraph(text,y):
+ # Wrap to the available column, rather than introducing short manual lines.
+ ft,gs,cmap,upm=fonts[('sans',400)]
+ def width(line):return sum(gs[cmap.get(ord(ch),'.notdef')].width for ch in line)*20/upm
+ lines=[];line=''
+ for word in text.split():
+  candidate=(line+' '+word).strip()
+  if line and width(candidate)>520:lines.append(line);line=word
+  else:line=candidate
+ if line:lines.append(line)
+ # Balance the short project paragraphs to avoid a two-word last line.
+ from itertools import combinations
+ words=text.split();target=width(text)/len(lines);best=None
+ for cuts in combinations(range(1,len(words)),len(lines)-1):
+  bounds=(0,*cuts,len(words));candidate=[' '.join(words[a:b]) for a,b in zip(bounds,bounds[1:])]
+  widths=[width(line) for line in candidate]
+  if max(widths)>520:continue
+  score=sum((value-target)**2 for value in widths)
+  if best is None or score<best[0]:best=(score,candidate)
+ if best:lines=best[1]
+ for line in lines:
+  s.text(line,56,y,20,fill='#4d4d4e');y+=32
+ return y
+
+y=project_paragraph("I'm building Rs Ecosystem as a long-term home for personal apps, starting with finance and passwords.",368)
+y=project_paragraph('Over time, I want to bring more everyday tools together on a shared Rust core, with native interfaces and data you control.',y+16)
+y+=16
+s.text('A wider ecosystem, built',56,y,17.5,fill=INK)
+s.text('one useful app at a time.',56,y+26,17.5,fill=INK)
+s.add('<path d="M56 612H596" stroke="#111113" stroke-opacity=".08"/>')
+x=56
+for tool in ['Rust','Crux','SwiftUI','Jetpack Compose','SQLite']:
+ x+=pill(s,tool,x,636,CANVAS,MUTED,13,12,30)+7
+s.rect(56,692,235,44,INK,22,False);s.text('Explore Rs Ecosystem',76,719,15,500,'white');s.arrow(263,708,'white')
+s.add('</g></g>');s.save('rs-ecosystem-long-term.svg')
+
 # README uses the same assets for the complete composition, with real links kept outside image-only cards.
 (OUT/'README.md').write_text('''<a href="https://www.ihsan.my.id"><img src="./assets/hero.svg" width="100%" alt="Muhammad Ihsan Wahyudin — Software Engineer · Backend & Full-Stack. Backend, web and mobile systems. Animated tech stack." /></a>
 
 <p align="center">
-<a href="https://www.ihsan.my.id"><img src="./assets/portfolio.svg" width="33.333333%" alt="Visit my portfolio" /></a><a href="https://www.linkedin.com/in/muhammad-ihsan-wahyudin-1a4a19209"><img src="./assets/linkedin.svg" width="33.333333%" alt="Connect on LinkedIn" /></a><a href="mailto:m.ihsanwahyudin@gmail.com"><img src="./assets/email.svg" width="33.333333%" alt="Send me an email" /></a>
+<a href="https://www.ihsan.my.id"><img src="./assets/portfolio.svg" width="32%" alt="Visit my portfolio" /></a><img src="./assets/contact-gap.svg" width="2%" height="1" alt="" /><a href="https://www.linkedin.com/in/muhammad-ihsan-wahyudin-1a4a19209"><img src="./assets/linkedin.svg" width="32%" alt="Connect on LinkedIn" /></a><img src="./assets/contact-gap.svg" width="2%" height="1" alt="" /><a href="mailto:m.ihsanwahyudin@gmail.com"><img src="./assets/email.svg" width="32%" alt="Send me an email" /></a>
 </p>
+
+<a href="https://rs-ecosystem.ihsan.my.id/en"><img src="./assets/rs-ecosystem-long-term.svg" width="100%" alt="Long-term Project — Rs Ecosystem. Offline-first personal apps, starting with finance and passwords, built on a shared Rust core with native interfaces and data you control. Preview of the English website." /></a>
 ''')
 (OUT/'INSTALL.md').write_text('''# GitHub profile — portfolio design edition
 
@@ -140,6 +205,7 @@ Acuan: src/components/sections/Hero.tsx, src/styles/globals.css, src/components/
 - Hero memakai dua kartu pilihan: perkenalan dan tech stack. Keduanya selebar profil, dengan radius 28 dan marquee dua arah.
 - Logo dan screenshot proyek asli dari folder public/ website; tidak memakai screenshot atau data contoh buatan.
 - Gradasi bergerak, glow lavender/peach, dan marquee CSS dua arah; menghormati prefers-reduced-motion.
+- Section Rs Ecosystem menyampaikan arah proyek jangka panjang, dengan screenshot asli halaman /en dan tautan ke versi Inggris. Screenshot disimpan di source/rs-ecosystem-en.jpg.
 - Tidak bergantung pada server gambar untuk aset desain. Semua gambar yang ditampilkan disimpan dalam repository.
 
 ## Batas tampilan GitHub
@@ -154,5 +220,5 @@ Font: Geist / Geist Mono (SIL Open Font License), https://github.com/google/font
 CodeMark dan ikon antarmuka diadaptasi dari komponen website. Lucide code-xml memakai lisensi ISC.
 ''')
 # Preview HTML uses exactly the same SVG image references as README.
-(OUT/'preview.html').write_text('''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ihsan · GitHub profile preview</title><style>*{box-sizing:border-box}body{margin:0;background:#0d1117;color:#c9d1d9;font:14px Arial,sans-serif}main{max-width:1012px;margin:32px auto;padding:28px;border:1px solid #30363d;border-radius:12px}img{width:100%;display:block}.links{margin:16px 0;line-height:0}.links a{display:inline}.links img{display:inline-block;vertical-align:top;width:33.333333%}.projects{display:flex;gap:12px}.projects a{width:50%}section{margin-top:24px}p{text-align:center;margin:24px}a{color:#a399ff}small{display:block;color:#8b949e;margin-bottom:24px} @media(max-width:650px){main{padding:12px;margin:0;border:none}}</style><main><small>README.md · Preview</small><a href="https://www.ihsan.my.id"><img src="assets/hero.svg" alt="Ihsan profile"/></a><div class="links"><a href="https://www.ihsan.my.id"><img src="assets/portfolio.svg" alt="Portfolio"/></a><a href="https://www.linkedin.com/in/muhammad-ihsan-wahyudin-1a4a19209"><img src="assets/linkedin.svg" alt="LinkedIn"/></a><a href="mailto:m.ihsanwahyudin@gmail.com"><img src="assets/email.svg" alt="Email"/></a></div></main></html>''')
+(OUT/'preview.html').write_text('''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ihsan · GitHub profile preview</title><style>*{box-sizing:border-box}body{margin:0;background:#0d1117;color:#c9d1d9;font:14px Arial,sans-serif}main{max-width:1012px;margin:32px auto;padding:28px;border:1px solid #30363d;border-radius:12px}img{width:100%;display:block}.links{margin:16px 0;line-height:0}.links a{display:inline}.links img{display:inline-block;vertical-align:top;width:32%}.links>img{width:2%;height:1px}.projects{display:flex;gap:12px}.projects a{width:50%}section{margin-top:24px}p{text-align:center;margin:24px}a{color:#a399ff}small{display:block;color:#8b949e;margin-bottom:24px} @media(max-width:650px){main{padding:12px;margin:0;border:none}}</style><main><small>README.md · Preview</small><a href="https://www.ihsan.my.id"><img src="assets/hero.svg" alt="Ihsan profile"/></a><div class="links"><a href="https://www.ihsan.my.id"><img src="assets/portfolio.svg" alt="Portfolio"/></a><img src="assets/contact-gap.svg" width="2%" height="1" alt=""/><a href="https://www.linkedin.com/in/muhammad-ihsan-wahyudin-1a4a19209"><img src="assets/linkedin.svg" alt="LinkedIn"/></a><img src="assets/contact-gap.svg" width="2%" height="1" alt=""/><a href="mailto:m.ihsanwahyudin@gmail.com"><img src="assets/email.svg" alt="Email"/></a></div><section><a href="https://rs-ecosystem.ihsan.my.id/en"><img src="assets/rs-ecosystem-long-term.svg" alt="Long-term Project — Rs Ecosystem. English website preview."/></a></section></main></html>''')
 print('Rebuilt',len(list(A.glob('*.svg'))),'SVG assets with original Geist outlines, colors, real logos and project screenshots.')

@@ -15,6 +15,7 @@ Acuan: src/components/sections/Hero.tsx, src/styles/globals.css, src/components/
 - Hero memakai dua kartu pilihan: perkenalan dan tech stack. Keduanya selebar profil, dengan radius 28 dan marquee dua arah.
 - Logo dan screenshot proyek asli dari folder public/ website; tidak memakai screenshot atau data contoh buatan.
 - Gradasi bergerak, glow lavender/peach, dan marquee CSS dua arah; menghormati prefers-reduced-motion.
+- Section Rs Ecosystem menyampaikan arah proyek jangka panjang, dengan screenshot asli halaman /en dan tautan ke versi Inggris. Screenshot disimpan di source/rs-ecosystem-en.jpg.
 - Tidak bergantung pada server gambar untuk aset desain. Semua gambar yang ditampilkan disimpan dalam repository.
 
 ## Batas tampilan GitHub
